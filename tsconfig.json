@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./out",
+    "paths": {
+      "~/*": ["./*"]
+    }
+  }
+}
