@@ -1,4 +1,7 @@
 import Head from "next/head";
+import Image from "next/image";
+import qhLogo from "../../public/qh logo.png";
+import React, { useState } from "react";
 
 type Show = {
   date: string;
@@ -6,16 +9,18 @@ type Show = {
   description: string;
   ticketLink: string;
 };
-import Link from "next/link";
-import Image from "next/image";
-import qhLogo from "../../public/qh logo.png";
-import React, { useState } from "react";
-import { map } from "zod";
-import { Menu } from "@headlessui/react";
+
+type Email = {
+  subject: string;
+  shows?: Show[];
+};
 
 export default function Home() {
-  const [emailJSON, setEmailJson] = useState({});
-  const setEmailJSON = (newEmailJSON: object) => {
+  const email: Email = {
+    subject: "Queens Hall Presents:",
+  };
+  const [emailJSON, setEmailJson] = useState(email);
+  const setEmailJSON = (newEmailJSON: Email) => {
     setEmailJson(newEmailJSON);
   };
   return (
@@ -34,19 +39,16 @@ export default function Home() {
 }
 
 const SideBar: React.FC<{
-  emailJSON: object;
-  setEmailJSON: (newEmailJSON: object) => void;
+  emailJSON: Email;
+  setEmailJSON: (newEmailJSON: Email) => void;
 }> = ({ emailJSON, setEmailJSON }) => {
-  const elements = {
-    show: <ShowEditor />,
-  };
   return (
     <div className="flex h-full w-1/4 flex-col gap-2 bg-stiletto-700 px-8 py-4">
       <Image src={qhLogo} alt="Queens Hall logo" height={110} />
       <span className="mt-2 border-b-2 border-white" />
       <div className="flex h-full w-full flex-col gap-2 overflow-y-auto">
-        <AddIcon emailJSON={emailJSON} setEmailJSON={setEmailJSON} />
         <ShowEditor />
+        <AddIcon emailJSON={emailJSON} setEmailJSON={setEmailJSON} />
       </div>
       <h4 className="text-center text-xs text-white">
         © William Stoneham 2023
@@ -56,15 +58,11 @@ const SideBar: React.FC<{
 };
 
 const AddIcon: React.FC<{
-  emailJSON: object;
-  setEmailJSON: (newEmailJSON: object) => void;
+  emailJSON: Email;
+  setEmailJSON: (newEmailJSON: Email) => void;
 }> = (emailJSON, setEmailJSON) => {
-  const clickHandler = () => {
-    // get the current emailJSON
-    //
-  };
   return (
-    <span className="relative flex justify-center" onClick={clickHandler}>
+    <span className="relative flex justify-center">
       <svg
         className="slate-600 hover:slate-800 aspect-square w-10 cursor-pointer text-white"
         fill="none"
