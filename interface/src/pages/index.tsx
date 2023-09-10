@@ -1,9 +1,17 @@
 import Head from "next/head";
+
+type Show = {
+  date: string;
+  title: string;
+  description: string;
+  ticketLink: string;
+};
 import Link from "next/link";
 import Image from "next/image";
 import qhLogo from "../../public/qh logo.png";
 import React, { useState } from "react";
 import { map } from "zod";
+import { Menu } from "@headlessui/react";
 
 export default function Home() {
   const [emailJSON, setEmailJson] = useState({});
@@ -37,8 +45,8 @@ const SideBar: React.FC<{
       <Image src={qhLogo} alt="Queens Hall logo" height={110} />
       <span className="mt-2 border-b-2 border-white" />
       <div className="flex h-full w-full flex-col gap-2 overflow-y-auto">
+        <AddIcon emailJSON={emailJSON} setEmailJSON={setEmailJSON} />
         <ShowEditor />
-        <AddIcon />
       </div>
       <h4 className="text-center text-xs text-white">
         © William Stoneham 2023
@@ -47,21 +55,30 @@ const SideBar: React.FC<{
   );
 };
 
-const AddIcon = () => {
+const AddIcon: React.FC<{
+  emailJSON: object;
+  setEmailJSON: (newEmailJSON: object) => void;
+}> = (emailJSON, setEmailJSON) => {
+  const clickHandler = () => {
+    // get the current emailJSON
+    //
+  };
   return (
-    <svg
-      className="slate-600 hover:slate-800 aspect-square w-10 cursor-pointer text-white"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-      ></path>
-    </svg>
+    <span className="relative flex justify-center" onClick={clickHandler}>
+      <svg
+        className="slate-600 hover:slate-800 aspect-square w-10 cursor-pointer text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        ></path>
+      </svg>
+    </span>
   );
 };
 
@@ -72,7 +89,7 @@ const ShowEditor = () => {
         {/* <input className="flex-1 cursor-text bg-transparent font-semibold focus:bg-transparent focus:outline-none" /> */}
         <input
           className="w-10 flex-1 cursor-text border-white bg-transparent text-xl font-extrabold text-white hover:text-gray-200 focus:bg-transparent focus:outline-none"
-          defaultValue="Show"
+          placeholder="example show"
         />
         <span className="aspect-square h-5 cursor-pointer">
           <svg
@@ -97,8 +114,19 @@ const ShowEditor = () => {
           className="flex-1 cursor-text border-white bg-transparent focus:border-b-2 focus:outline-none"
         />
       </span>
+      <span className="my-2 flex gap-2">
+        <p>Ticket Link:</p>
+        <input
+          type="url"
+          className="flex-1 cursor-text border-white bg-transparent focus:border-b-2 focus:outline-none"
+          placeholder="https://example.com"
+        />
+      </span>
       <span>
-        <textarea className="w-full bg-transparent focus:outline-none" />
+        <textarea
+          className="w-full bg-transparent focus:outline-none"
+          placeholder="description"
+        />
       </span>
       <input type="file" className="hidden" />
     </div>
