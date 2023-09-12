@@ -63,7 +63,9 @@ const Home = () => {
       </Head>
       <div className="flex h-screen w-screen flex-row">
         <SideBar />
-        <main className="flex min-h-screen flex-col"></main>
+        <main className="flex min-h-screen flex-col">
+          <EmailRenderer />
+        </main>
       </div>
     </>
   );
@@ -79,6 +81,9 @@ const SideBar: React.FC = () => {
       <input
         className="border-white bg-transparent text-xl font-bold tracking-tight text-white focus:border-b-2 focus:outline-none"
         placeholder="Email Subject"
+        type="text"
+        value={useStore((state) => state.subject)}
+        onChange={(e) => updateSubject(e.target.value)}
       />
       <div className="scrollbar-hide flex h-full w-full flex-col gap-2 overflow-y-auto overflow-x-clip">
         {useStore(
@@ -205,4 +210,8 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
       <input type="file" className="hidden" />
     </div>
   );
+};
+
+const EmailRenderer: React.FC = () => {
+  return <div className="flex flex-col gap-4"></div>;
 };
