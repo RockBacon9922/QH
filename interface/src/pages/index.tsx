@@ -5,6 +5,7 @@ import React, { type ReactNode, useState } from "react";
 import { object } from "zod";
 import { StoreApi, UseBoundStore, create } from "zustand";
 import { v4 } from "uuid";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 type Show = {
   uuid: string;
@@ -74,6 +75,7 @@ const Home = () => {
 export default Home;
 
 const SideBar: React.FC = () => {
+  const [parent] = useAutoAnimate();
   return (
     <div className="flex h-full w-1/4 flex-col gap-2 bg-stiletto-700 px-8 py-4">
       <Image src={qhLogo} alt="Queens Hall logo" height={110} priority />
@@ -85,7 +87,10 @@ const SideBar: React.FC = () => {
         value={useStore((state) => state.subject)}
         onChange={(e) => updateSubject(e.target.value)}
       />
-      <div className="scrollbar-hide flex h-full w-full flex-col gap-2 overflow-y-auto overflow-x-clip">
+      <div
+        className="scrollbar-hide flex h-full w-full flex-col gap-2 overflow-y-auto overflow-x-clip"
+        ref={parent}
+      >
         {useStore(
           (state) =>
             state.shows?.map((show) => (
