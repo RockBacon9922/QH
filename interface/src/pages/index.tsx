@@ -32,7 +32,7 @@ type Show = {
   title: string;
   description: string;
   ticketLink: string;
-  image?: string | ArrayBuffer;
+  image?: string;
 };
 
 type Email = {
@@ -48,7 +48,11 @@ type Action = {
 };
 
 const useStore = create<Email & Action>((set) => ({
-  subject: "",
+  subject:
+    "What's On " +
+    new Date().toLocaleDateString("en-GB", {
+      month: "long",
+    }),
   addShow: (show) =>
     set((state) => ({
       ...state,
@@ -100,7 +104,7 @@ const SideBar: React.FC = () => {
       <Image src={qhLogo} alt="Queens Hall logo" height={110} priority />
       <span className="mt-2 border-b-2 border-white" />
       <input
-        className="border-white bg-transparent text-xl font-bold tracking-tight text-white focus:border-b-2 focus:outline-none"
+        className="border-white bg-transparent text-center text-xl font-bold tracking-tight text-white focus:border-b-2 focus:outline-none"
         placeholder="Email Subject"
         type="text"
         value={useStore((state) => state.subject)}
@@ -130,7 +134,16 @@ const SideBar: React.FC = () => {
           />
         </span>
       </div>
-      <button className="rounded bg-white px-4 py-2 font-bold text-stiletto-700">
+      <button
+        className="rounded bg-white px-4 py-2 font-bold text-stiletto-700"
+        onClick={() => {
+          const email = useStore.getState();
+          const a = render(<EmailComponent email={email} />);
+          const blob = new Blob([a], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+          window.open(url, "_blank");
+        }}
+      >
         Send Email
       </button>
       <h4 className="text-center text-xs text-white">
@@ -173,7 +186,7 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
         {/* <input className="flex-1 cursor-text bg-transparent font-semibold focus:bg-transparent focus:outline-none" /> */}
         <input
           className="w-10 flex-1 cursor-text border-white bg-transparent text-xl font-extrabold text-white hover:text-gray-200 focus:bg-transparent focus:outline-none"
-          placeholder="example show"
+          placeholder="Example show"
           value={show.title}
           onChange={(e) => {
             updateShow({ ...show, title: e.target.value });
@@ -221,22 +234,15 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
           }}
         />
       </span>
-      <span>
-        {/* Poster image uploader */}
-        <p>Poster:</p>
+      <span className="my-2 flex gap-2">
+        <p>Image url:</p>
         <input
-          type="file"
-          accept="image/*"
+          type="url"
+          placeholder="https://example.com/image.png"
+          className="flex-1 cursor-text border-white bg-transparent focus:border-b-2 focus:outline-none"
+          value={show.image}
           onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const image = e.target?.result;
-              if (!image) return;
-              updateShow({ ...show, image: image });
-            };
-            reader.readAsDataURL(file);
+            updateShow({ ...show, image: e.target.value });
           }}
         />
       </span>
@@ -268,10 +274,10 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
     <Html>
       <Head>
         <Font
-          fontFamily="Roboto"
+          fontFamily="Poppins"
           fallbackFontFamily="Verdana"
           webFont={{
-            url: "https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2",
+            url: "https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJbecnFHGPezSQ.woff2",
             format: "woff2",
           }}
           fontWeight={400}
@@ -290,18 +296,11 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
                 width={logoHeight * 2.5553539}
                 height={logoHeight}
               />
-              <Heading className="text-center text-white">{subject}</Heading>
+              <Heading className="text-center font-semibold text-white">
+                {subject}
+              </Heading>
             </Section>
             {shows?.map((show) => {
-              const formattedDate = new Date(show.date).toLocaleDateString(
-                "en-GB",
-                {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                },
-              );
               return (
                 <Section key={show.uuid} id={show.uuid}>
                   <hr />
@@ -310,19 +309,36 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
                       <Img
                         className="w-full"
                         alt="Comedy Poster"
-                        src={show.image as string}
+                        src={
+                          show.image != ""
+                            ? `${baseUrl}/qh%20noImg.png`
+                            : show.image
+                        }
                       />
                     </Row>
                     <Row>
                       <Column className="w-1/2">
-                        <Heading className="">{show.title}</Heading>
-                        <Text className="">{show.description}</Text>
+                        <Heading className="text-slate-700">
+                          {show.title}
+                        </Heading>
+                        <Text className="text-slate-700 antialiased">
+                          {show.description}
+                        </Text>
                       </Column>
-                      <Column className="w-1/2">
-                        <Text className="">{formattedDate}</Text>
-                        <Link className="" href={show.ticketLink}>
-                          Tickets
-                        </Link>
+                      <Column className="w-1/2 text-center">
+                        <Text className="text-lg font-medium text-slate-700">
+                          {new Date(show.date).toLocaleDateString("en-GB", {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </Text>
+                        <Button
+                          className="bg-QHgold px-5 py-4 text-xl font-bold text-stiletto-50"
+                          href={show.ticketLink}
+                        >
+                          Book Tickets
+                        </Button>
                       </Column>
                     </Row>
                   </Section>
@@ -331,16 +347,28 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
             })}
             <Section className="bg-stiletto-700 p-5">
               <Text className="text-center text-white">
-                © Queens Hall 2021
+                Queens Hall Theatre, Waterloo Road, Cranbrook, Kent, TN17 3JD
               </Text>
               <Text className="text-center text-white">
-                Queens Hall, High Street, Narberth, Pembrokeshire, SA67 7AS
+                Box Office:{" "}
+                <Link href="tel:01580711800" className="text-white">
+                  01580 711800
+                </Link>
               </Text>
               <Text className="text-center text-white">
-                Box Office: 01834 869323
+                Website:{" "}
+                <Link
+                  href="https://queenshalltheatre.co.uk"
+                  className="text-white"
+                >
+                  https://queenshalltheatre.co.uk
+                </Link>
               </Text>
               <Text className="text-center text-white">
-                Charity No: 1002776
+                © Queens Hall Theatre{" "}
+                {new Date().toLocaleDateString("en-GB", {
+                  year: "numeric",
+                })}
               </Text>
             </Section>
           </Container>

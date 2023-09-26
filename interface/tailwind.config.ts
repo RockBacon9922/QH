@@ -6,6 +6,7 @@ export default {
     extend: {
       colors: {
         QH: "#962d46",
+        QHgold: "#997F60",
         stiletto: {
           "50": "#fdf3f4",
           "100": "#fae9ea",
