@@ -101,6 +101,7 @@ export default Home;
 const SideBar: React.FC = () => {
   const [parent] = useAutoAnimate();
   const [isOpen, setOpen] = useState(false);
+  const [emailAddress, setEmailAddress] = useState("");
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
   return (
@@ -178,9 +179,15 @@ const SideBar: React.FC = () => {
                     Who are we sending this to?
                   </Dialog.Title>
                   <div className="mt-2">
-                    <textarea
+                    {/* <textarea
                       className="text mt-5 block h-40 w-full max-w-full rounded-md border-gray-300 text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-stiletto-500 sm:text-sm"
                       placeholder="fake@gmail.com,fake@gmail.com"
+                    /> */}
+                    <input
+                      type="email"
+                      className="text mt-5 block w-full max-w-full rounded-md border-gray-300 text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-stiletto-500 sm:text-sm"
+                      onChange={(e) => setEmailAddress(e.target.value)}
+                      value={emailAddress}
                     />
                   </div>
 
@@ -198,7 +205,7 @@ const SideBar: React.FC = () => {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                              to: "william.stoneham04@gmail.com",
+                              to: emailAddress,
                               subject: email.subject,
                               html: a,
                             }),
@@ -398,7 +405,6 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
                             : show.image
                         }
                       />
-                      {show.image === "" ? show.image : show.image}
                     </Row>
                     <Row>
                       <Column className="w-1/2">
