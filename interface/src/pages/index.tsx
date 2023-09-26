@@ -1,11 +1,12 @@
 import NextHead from "next/head";
 import Image from "next/image";
 import qhLogo from "../../public/qh logo.png";
-import React, { useEffect } from "react";
+import { Fragment, useState } from "react";
 import { create } from "zustand";
 import { v4 } from "uuid";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import tailwindConfig from "../../tailwind.config";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   Body,
   Button,
@@ -99,6 +100,9 @@ export default Home;
 
 const SideBar: React.FC = () => {
   const [parent] = useAutoAnimate();
+  const [isOpen, setOpen] = useState(false);
+  const openModal = () => setOpen(true);
+  const closeModal = () => setOpen(false);
   return (
     <div className="flex h-full w-max flex-col gap-2 bg-stiletto-700 px-8 py-4">
       <Image src={qhLogo} alt="Queens Hall logo" height={110} priority />
@@ -137,22 +141,92 @@ const SideBar: React.FC = () => {
       </div>
       <button
         className="rounded bg-white px-4 py-2 font-bold text-stiletto-700"
-        onClick={() => {
-          const email = useStore.getState();
-          const a = render(<EmailComponent email={email} />);
-          const response = fetch("https://react.email/api/send/test", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              to: "william.stoneham04@gmail.com",
-              subject: "hey",
-              html: a,
-            }),
-          });
-        }}
+        onClick={openModal}
       >
         Send Email
       </button>
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={closeModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-xl font-medium leading-6 text-gray-900"
+                  >
+                    Who are we sending this to?
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <textarea
+                      className="text mt-5 block h-40 w-full max-w-full rounded-md border-gray-300 text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-stiletto-500 sm:text-sm"
+                      placeholder="fake@gmail.com,fake@gmail.com"
+                    />
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-stiletto-100 px-4 py-2 text-sm font-medium text-stiletto-900 hover:bg-stiletto-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stiletto-500 focus-visible:ring-offset-2"
+                      onClick={() => {
+                        closeModal();
+                        const email = useStore.getState();
+                        const a = render(<EmailComponent email={email} />);
+                        const response = fetch(
+                          "https://react.email/api/send/test",
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              to: "william.stoneham04@gmail.com",
+                              subject: email.subject,
+                              html: a,
+                            }),
+                          },
+                        );
+                      }}
+                    >
+                      Send
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                      onClick={() => {
+                        closeModal();
+                        const email = useStore.getState();
+                        const a = render(<EmailComponent email={email} />);
+                        async () => await navigator.clipboard.writeText(a);
+                      }}
+                    >
+                      Copy HTML
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
       <h4 className="text-center text-xs text-white">
         © William Stoneham 2023
       </h4>
@@ -268,9 +342,7 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
   );
 };
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "";
+const baseUrl = "https://qh-react-email.vercel.app";
 
 export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
   // get email subject from store
@@ -374,6 +446,15 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
                   className="text-white"
                 >
                   https://queenshalltheatre.co.uk
+                </Link>
+              </Text>
+              <Text className="text-center text-white">
+                Not interested anymore?{" "}
+                <Link
+                  href="mailto:Hulland-RumleyK@cranbrook.kent.sch.uk?subject=Unsubscribe%20From%20Queens%20Hall%20Theatre%20Newletter&body=Dear%20Kester%20Hulland-Rumley%0D%0A%0D%0AI%20would%20kindly%20like%20to%20ask%20for%20this%20email%20to%20be%20removed%20from%20the%20Queens%20Hall%20Theatre%20Mailing%20List.%0D%0A%0D%0AKind%20regards%0D%0ACustomer"
+                  className="text-white"
+                >
+                  Unsubscribe
                 </Link>
               </Text>
               <Text className="text-center text-white">
