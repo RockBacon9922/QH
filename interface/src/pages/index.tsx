@@ -32,7 +32,7 @@ type Show = {
   title: string;
   description: string;
   ticketLink: string;
-  image?: string;
+  image: string;
 };
 
 type Email = {
@@ -129,6 +129,7 @@ const SideBar: React.FC = () => {
                 title: "",
                 description: "",
                 ticketLink: "",
+                image: "",
               })
             }
           />
@@ -314,13 +315,18 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
                     <Row>
                       <Img
                         className="w-full"
-                        alt="Comedy Poster"
+                        alt={
+                          show.title +
+                          " Poster " +
+                          new Date(show.date).toLocaleDateString("en-GB")
+                        }
                         src={
-                          show.image != ""
+                          show.image === ""
                             ? `${baseUrl}/qh%20noImg.png`
                             : show.image
                         }
                       />
+                      {show.image === "" ? show.image : show.image}
                     </Row>
                     <Row>
                       <Column className="w-1/2">
