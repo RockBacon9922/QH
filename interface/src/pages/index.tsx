@@ -139,9 +139,15 @@ const SideBar: React.FC = () => {
         onClick={() => {
           const email = useStore.getState();
           const a = render(<EmailComponent email={email} />);
-          const blob = new Blob([a], { type: "text/html" });
-          const url = URL.createObjectURL(blob);
-          window.open(url, "_blank");
+          const response = fetch("https://react.email/api/send/test", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: "william.stoneham04@gmail.com",
+              subject: "hey",
+              html: a,
+            }),
+          });
         }}
       >
         Send Email
