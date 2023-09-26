@@ -1,11 +1,30 @@
-import Head from "next/head";
+import NextHead from "next/head";
 import Image from "next/image";
 import qhLogo from "../../public/qh logo.png";
-import React, { type ReactNode, useState } from "react";
-import { object } from "zod";
-import { StoreApi, UseBoundStore, create } from "zustand";
+import React, { useEffect } from "react";
+import { create } from "zustand";
 import { v4 } from "uuid";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import tailwindConfig from "../../tailwind.config";
+import {
+  Body,
+  Button,
+  Column,
+  Container,
+  Font,
+  Heading,
+  Hr,
+  Html,
+  Head,
+  Img,
+  Link,
+  Preview,
+  Row,
+  Section,
+  Tailwind,
+  Text,
+} from "@react-email/components";
+import { render } from "@react-email/render";
 
 type Show = {
   uuid: string;
@@ -13,6 +32,7 @@ type Show = {
   title: string;
   description: string;
   ticketLink: string;
+  image?: string | ArrayBuffer;
 };
 
 type Email = {
@@ -54,17 +74,16 @@ const useStore = create<Email & Action>((set) => ({
 const { addShow, updateShow, removeShow, updateSubject } = useStore.getState();
 
 const Home = () => {
-  updateSubject("Queens Hall Presents: 2021");
   return (
     <>
-      <Head>
+      <NextHead>
         <title>QH Email Creator</title>
         <meta name="description" content="QH Email Creator" />
         <link rel="icon" href="/favicon.ico" />
-      </Head>
+      </NextHead>
       <div className="flex h-screen w-screen flex-row">
         <SideBar />
-        <main className="flex min-h-screen flex-col">
+        <main className="flex-1">
           <EmailRenderer />
         </main>
       </div>
@@ -77,7 +96,7 @@ export default Home;
 const SideBar: React.FC = () => {
   const [parent] = useAutoAnimate();
   return (
-    <div className="flex h-full w-1/4 flex-col gap-2 bg-stiletto-700 px-8 py-4">
+    <div className="flex h-full w-max flex-col gap-2 bg-stiletto-700 px-8 py-4">
       <Image src={qhLogo} alt="Queens Hall logo" height={110} priority />
       <span className="mt-2 border-b-2 border-white" />
       <input
@@ -162,7 +181,7 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
         />
         <span
           className="aspect-square h-5 cursor-pointer"
-          onClick={(e) => removeShow({ ...show })}
+          onClick={() => removeShow({ ...show })}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -203,6 +222,25 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
         />
       </span>
       <span>
+        {/* Poster image uploader */}
+        <p>Poster:</p>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const image = e.target?.result;
+              if (!image) return;
+              updateShow({ ...show, image: image });
+            };
+            reader.readAsDataURL(file);
+          }}
+        />
+      </span>
+      <span>
         <textarea
           className="w-full bg-transparent focus:outline-none"
           placeholder="description"
@@ -217,6 +255,104 @@ const ShowEditor: React.FC<{ show: Show }> = ({ show, ...props }) => {
   );
 };
 
+const baseUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "";
+
+export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
+  // get email subject from store
+  const { subject, shows } = email;
+  const logoHeight = 80;
+
+  return (
+    <Html>
+      <Head>
+        <Font
+          fontFamily="Roboto"
+          fallbackFontFamily="Verdana"
+          webFont={{
+            url: "https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2",
+            format: "woff2",
+          }}
+          fontWeight={400}
+          fontStyle="normal"
+        />
+      </Head>
+      <Preview>{subject}</Preview>
+      <Tailwind config={tailwindConfig}>
+        <Body className="mx-auto my-auto bg-white font-sans">
+          <Container className="h-max gap-5 p-10">
+            <Section className="bg-stiletto-700 p-5">
+              <Img
+                className="mx-auto"
+                alt="Queens Hall logo"
+                src={`${baseUrl}/qh%20logo.png`}
+                width={logoHeight * 2.5553539}
+                height={logoHeight}
+              />
+              <Heading className="text-center text-white">{subject}</Heading>
+            </Section>
+            {shows?.map((show) => {
+              const formattedDate = new Date(show.date).toLocaleDateString(
+                "en-GB",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                },
+              );
+              return (
+                <Section key={show.uuid} id={show.uuid}>
+                  <hr />
+                  <Section className="p-5">
+                    <Row>
+                      <Img
+                        className="w-full"
+                        alt="Comedy Poster"
+                        src={show.image as string}
+                      />
+                    </Row>
+                    <Row>
+                      <Column className="w-1/2">
+                        <Heading className="">{show.title}</Heading>
+                        <Text className="">{show.description}</Text>
+                      </Column>
+                      <Column className="w-1/2">
+                        <Text className="">{formattedDate}</Text>
+                        <Link className="" href={show.ticketLink}>
+                          Tickets
+                        </Link>
+                      </Column>
+                    </Row>
+                  </Section>
+                </Section>
+              );
+            })}
+            <Section className="bg-stiletto-700 p-5">
+              <Text className="text-center text-white">
+                © Queens Hall 2021
+              </Text>
+              <Text className="text-center text-white">
+                Queens Hall, High Street, Narberth, Pembrokeshire, SA67 7AS
+              </Text>
+              <Text className="text-center text-white">
+                Box Office: 01834 869323
+              </Text>
+              <Text className="text-center text-white">
+                Charity No: 1002776
+              </Text>
+            </Section>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+};
+
 const EmailRenderer: React.FC = () => {
-  return <div className="flex flex-col gap-4"></div>;
+  // reload this component when the store changes
+  const store = useStore();
+  const a = render(<EmailComponent email={store} />);
+  return <iframe srcDoc={a} className="h-full w-full" />;
 };
