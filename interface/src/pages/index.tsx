@@ -310,7 +310,7 @@ export const EmailComponent: React.FC<{ email: Email }> = ({ email }) => {
             {shows?.map((show) => {
               return (
                 <Section key={show.uuid} id={show.uuid}>
-                  <hr />
+                  <Hr />
                   <Section className="p-5">
                     <Row>
                       <Img
