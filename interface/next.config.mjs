@@ -17,6 +17,22 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async headers() {
+    return [
+      {
+        // matching all API routes
+        source: "/",
+        headers: [
+          // allow images to be requested from anywhere
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default config;

@@ -29,7 +29,8 @@
     "**/*.cjs",
     "**/*.mjs",
     "components/*.tsx",
-    "components/emails/*.tsx"
+    "components/emails/*.tsx",
+    "next.config.js"
   ],
   "exclude": ["node_modules"]
 }
